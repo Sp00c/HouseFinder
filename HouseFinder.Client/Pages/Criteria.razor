@@ -1,0 +1,125 @@
+﻿@page "/criteriamaintenance"
+@using HouseFinder.Client.Models
+@using HouseFinder.Client
+@using System.Text.Json
+@using System.Text
+
+@inject HttpClient Http
+
+<RadzenCard>
+    <RadzenDataGrid @ref="@CriteriaGrid" TItem="CriteriaView" Data="@criterias" Visible="@criterias.Any()">
+    <Columns>
+        <RadzenDataGridColumn Title="Criterias" TItem="CriteriaView" Property="Name"/>
+        <RadzenDataGridColumn TItem="CriteriaView">
+            <Template Context="criteria">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" 
+                Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteRow(criteria))"  @onclick:stopPropagation="true"/>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
+<RadzenCard>
+    <div>
+        <RadzenButton Text="Add" Click="@(args => AddNewCriteria())" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+    </div>
+</RadzenCard>
+
+<RadzenCard Visible=@AddNew>
+    <RadzenHeader>New Criteria</RadzenHeader>
+    <div style="display: inline-flex">
+        <RadzenLabel Style="margin-right:20px" Text="Name" /> 
+        <RadzenTextBox @bind-Value="newCriteria.Name" class="col-md-6" />
+        <RadzenButton Style="margin-left:20px" Icon="check_circle" ButtonStyle="ButtonStyle.Success" Click="@(args => CreateCriteria())" />
+        <RadzenButton Style="margin-left:2px" Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@(args => CancelNewCriteria())" />
+    </div>
+</RadzenCard>
+
+@code {
+    RadzenDataGrid<CriteriaView> CriteriaGrid;
+    List<CriteriaView> criterias = new List<CriteriaView>();
+    Boolean AddNew = false;
+    CriteriaView newCriteria = new CriteriaView();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchCriterias();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task FetchCriterias()
+    {
+        criterias.Clear();
+
+        var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://localhost:44386/api/Criteria/GetCriterias")
+            };
+
+        var response = await Http.SendAsync(request).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+        var criteriaDtos = System.Text.Json.JsonSerializer.Deserialize<List<CriteriaDto>>(responseBody, options);
+
+        await PopulateCriteriaViews(criteriaDtos);
+        CriteriaGrid.Reload();
+    }
+
+    private async Task PopulateCriteriaViews(List<CriteriaDto> criteriaDtos)
+    {        
+        foreach(var criteria in criteriaDtos)
+        {
+            criterias.Add(new CriteriaView(criteria.Criteria_Id, criteria.Criteria_Name));
+        }
+    }
+
+    private async Task AddNewCriteria()
+    {
+        AddNew = !AddNew;
+    }
+
+    private async Task CreateCriteria()
+    {
+        //var request = new HttpRequestMessage
+        //    {
+        //        Method = HttpMethod.Post,
+        //        RequestUri = new Uri("https://localhost:44386/api/Criteria/CreateCriteria"),
+        //        Content = new StringContent(System.Text.Json.JsonSerializer.Serialize<CriteriaView>(newCriteria), Encoding.UTF8, "application/json")
+        //    };
+
+        var content = new StringContent(System.Text.Json.JsonSerializer.Serialize<CriteriaView>(newCriteria), Encoding.UTF8, "application/json");
+        var response = await Http.PostAsync("https://localhost:44386/api/Criteria/CreateCriteria", content).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        await FetchCriterias();
+        AddNew = false;
+    }
+
+    private async Task CancelNewCriteria()
+    {
+        AddNew = false;
+    }
+
+    private async Task DeleteRow(CriteriaView criteria)
+    {
+        var uri = "https://localhost:44386/api/Criteria/DeleteCriteria/" + criteria.Id;
+        var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(uri));
+        var response = await Http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        //string req = $"https://localhost:44386/api/Criteria/DeleteCriteria/{criteria.Id}";
+        //var response = await Http.DeleteAsync(req).ConfigureAwait(false);
+        //response.EnsureSuccessStatusCode();
+        //var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        await FetchCriterias();
+    }
+}
