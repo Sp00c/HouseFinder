@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
-        "AllowOrigin",
+        "CorsPolicy",
         builder => builder.WithOrigins("https://localhost:7015")
         .AllowAnyMethod()
         .AllowAnyHeader()
@@ -32,7 +32,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseRouting();
-app.UseCors("AllowOrigin");
+app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
 app.UseHttpsRedirection();

@@ -8,7 +8,7 @@ namespace HouseFinder.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("AllowOrigin")]
+    [EnableCors("CorsPolicy")]
     public class CriteriaController : ControllerBase
     {
         private HouseFinderDbContext _context;
