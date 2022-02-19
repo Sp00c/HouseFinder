@@ -1,4 +1,5 @@
-﻿using HouseFinder.Data;
+﻿using HouseFinder.Api.Data.Models;
+using HouseFinder.Data;
 using HouseFinder.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -18,13 +19,13 @@ namespace HouseFinder.Controllers
             _context = dbContext;
         }
 
-        [HttpGet("GetCriterias")]
+        [HttpGet]
         public IActionResult Get()
         {
             try
             {
                 var criterias = _context.Criteria.ToList();
-                if (!criterias.Any()) return StatusCode(StatusCodes.Status404NotFound, "criteria not found");
+                if (!criterias.Any()) return BadRequest("No criterias found");
                 
                 return Ok(criterias);
             }
@@ -35,7 +36,7 @@ namespace HouseFinder.Controllers
             }
         }
 
-        [HttpPost("CreateCriteria")]
+        [HttpPost]
         public IActionResult Create([FromBody] CriteriaRequest request)
         {
             CriteriaDto dto = new CriteriaDto()
@@ -57,13 +58,13 @@ namespace HouseFinder.Controllers
         }
 
 
-        [HttpPut("UpdateCriteria")]
+        [HttpPut]
         public IActionResult Update([FromBody] CriteriaRequest request)
         {
             try
             {
                 var criteria = _context.Criteria.FirstOrDefault(c => c.Criteria_Id == request.Id);
-                if (criteria == null) return StatusCode(StatusCodes.Status404NotFound, "Criteria not found");
+                if (criteria == null) return BadRequest("Criteria not found");
 
                 criteria.Criteria_Name = request.Name;
 
@@ -81,13 +82,13 @@ namespace HouseFinder.Controllers
             }
         }
 
-        [HttpDelete("DeleteCriteria/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute]int id)
         {
             try
             {
                 var criteria = _context.Criteria.FirstOrDefault(u => u.Criteria_Id == id);
-                if (criteria == null) return StatusCode(StatusCodes.Status404NotFound, "Criteria not found");
+                if (criteria == null) return BadRequest("Criteria not found");
 
                 _context.Entry(criteria).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
                 _context.SaveChanges();

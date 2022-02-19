@@ -54,7 +54,7 @@
         var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri("https://localhost:44386/api/Criteria/GetCriterias")
+                RequestUri = new Uri("https://localhost:44386/api/Criteria")
             };
 
         var response = await Http.SendAsync(request).ConfigureAwait(false);
@@ -90,7 +90,7 @@
     {
         var newCriteria = new CriteriaView(newCriteriaName);
         var content = new StringContent(System.Text.Json.JsonSerializer.Serialize<CriteriaView>(newCriteria), Encoding.UTF8, "application/json");
-        var response = await Http.PostAsync("https://localhost:44386/api/Criteria/CreateCriteria", content).ConfigureAwait(false);
+        var response = await Http.PostAsync("https://localhost:44386/api/Criteria/", content).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -112,7 +112,7 @@
         //var response = await Http.SendAsync(request);
         //response.EnsureSuccessStatusCode();
 
-        string req = $"https://localhost:44386/api/Criteria/DeleteCriteria/{criteria.Id}";
+        string req = $"https://localhost:44386/api/Criteria/{criteria.Id}";
         var response = await Http.DeleteAsync(req).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

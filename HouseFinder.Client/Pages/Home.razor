@@ -1,0 +1,74 @@
+﻿@page "/"
+@using HouseFinder.Client.Components
+@using HouseFinder.Client.Models
+@using System.Text.Json
+@inject HttpClient Http
+
+<div class="row px-3">
+    <div class="col-md-7">
+        <RadzenCard>
+                <RadzenListBox TValue="PropertyView" SelectedItem="@property" Data="@properties" Change="@OnPropertySelected" TextProperty="HouseNumber" Style="height:200px" Class="w-100">
+                    <Template>
+                        @((context as PropertyView).HouseNumber + " " + (context as PropertyView).AddressFirstLine)
+                    </Template>
+                </RadzenListBox>
+        </RadzenCard>
+    </div>
+</div>
+<div class="row px-3">
+    <div class="col-md-7">
+        <RadzenDataGrid Data="@criteriaResults" />
+    </div>        
+</div>
+
+@code {
+    public List<PropertyView> properties;
+    public PropertyView property = new();
+    public List<CriteriaResultView> criteriaResults;
+    public List<CriteriaDto> criterias;
+
+    protected override Task OnInitializedAsync()
+    {
+        properties = new List<PropertyView>
+        {
+            new PropertyView { HouseNumber = "1", AddressFirstLine = "First View" },
+            new PropertyView { HouseNumber = "12", AddressFirstLine = "Second Close" },
+            new PropertyView { HouseNumber = "1234", AddressFirstLine = "Third Drive" },
+            new PropertyView { HouseNumber = "12345", AddressFirstLine = "Fourth Street" }
+        };
+        return base.OnInitializedAsync();
+    }
+
+    private void OnPropertySelected()
+    {
+        GetCriteriaResultsByPropertyId(property.Id);
+    }
+
+    private async Task GetCriteriaResultsByPropertyId(int propertyId)
+    {
+        
+    }
+
+    private async Task FetchCriterias()
+    {
+        criterias.Clear();
+
+        var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://localhost:44386/api/Criteria")
+            };
+
+        var response = await Http.SendAsync(request).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+        var criteriaDtos = System.Text.Json.JsonSerializer.Deserialize<List<CriteriaDto>>(responseBody, options);
+        if (criteriaDtos == null) return;
+    }
+}

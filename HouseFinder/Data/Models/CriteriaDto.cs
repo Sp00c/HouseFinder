@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HouseFinder.Data
+namespace HouseFinder.Api.Data.Models
 {
     public class CriteriaDto
     {

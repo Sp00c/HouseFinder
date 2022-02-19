@@ -1,0 +1,33 @@
+﻿@using HouseFinder.Client.Models
+@using Radzen.Blazor
+
+<div class="row px-3">
+    <div class="col-md-7">
+        <RadzenCard>
+                <RadzenListBox TValue="PropertyView" SelectedItem="@SelectedProperty" Data="@properties" TextProperty="HouseNumber" Style="height:200px" Class="w-100">
+                    <Template>
+                        @((context as PropertyView).HouseNumber + " " + (context as PropertyView).AddressFirstLine)
+                    </Template>
+                </RadzenListBox>
+        </RadzenCard>
+    </div>
+</div>
+
+@code {
+    [Parameter] 
+    public PropertyView SelectedProperty { get; set; } 
+
+    IEnumerable<PropertyView> properties;
+
+    protected override Task OnInitializedAsync()
+    {
+        properties = new List<PropertyView>
+        {
+            new PropertyView { HouseNumber = "1", AddressFirstLine = "Regency View" },
+            new PropertyView { HouseNumber = "99991", AddressFirstLine = "Flippity Close" },
+            new PropertyView { HouseNumber = "8906", AddressFirstLine = "Barrymore Drive" },
+            new PropertyView { HouseNumber = "234", AddressFirstLine = "Concrete Street" }
+        };
+        return base.OnInitializedAsync();
+    }
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HouseFinder.Api.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HouseFinder.Data
 {
@@ -10,5 +11,6 @@ namespace HouseFinder.Data
         }
 
         public DbSet<CriteriaDto> Criteria { get; set; }
+        public DbSet<PropertyDto> Property { get; set; }
     }
 }
